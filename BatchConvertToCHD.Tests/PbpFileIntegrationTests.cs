@@ -34,6 +34,15 @@ public class PbpFileIntegrationTests : IDisposable
         return Directory.Exists(SamplesDir);
     }
 
+    private sealed class PbpSamplesFactAttribute : FactAttribute
+    {
+        public PbpSamplesFactAttribute()
+        {
+            if (!SamplesExist())
+                Skip = "PBP integration samples are not installed on this machine.";
+        }
+    }
+
     private static IEnumerable<string> GetPbpFiles()
     {
         if (!SamplesExist())
@@ -60,7 +69,7 @@ public class PbpFileIntegrationTests : IDisposable
         }
     }
 
-    [Fact]
+    [PbpSamplesFact]
     public void OpenPbpFileReturnsSuccess()
     {
         var pbpFiles = GetPbpFiles().ToArray();
@@ -75,7 +84,7 @@ public class PbpFileIntegrationTests : IDisposable
         }
     }
 
-    [Fact]
+    [PbpSamplesFact]
     public void PbpHeaderIsValid()
     {
         var pbpFiles = GetPbpFiles().ToArray();
@@ -92,7 +101,7 @@ public class PbpFileIntegrationTests : IDisposable
         }
     }
 
-    [Fact]
+    [PbpSamplesFact]
     public void PbpSfoMetadataIsParsed()
     {
         var pbpFiles = GetPbpFiles().ToArray();
@@ -109,7 +118,7 @@ public class PbpFileIntegrationTests : IDisposable
         }
     }
 
-    [Fact]
+    [PbpSamplesFact]
     public void PbpHasTitle()
     {
         var pbpFiles = GetPbpFiles().ToArray();
@@ -125,7 +134,7 @@ public class PbpFileIntegrationTests : IDisposable
         }
     }
 
-    [Fact]
+    [PbpSamplesFact]
     public void PbpHasDiscId()
     {
         var pbpFiles = GetPbpFiles().ToArray();
@@ -141,7 +150,7 @@ public class PbpFileIntegrationTests : IDisposable
         }
     }
 
-    [Fact]
+    [PbpSamplesFact]
     public void PbpCategoryIsMe()
     {
         var pbpFiles = GetPbpFiles().ToArray();
@@ -157,7 +166,7 @@ public class PbpFileIntegrationTests : IDisposable
         }
     }
 
-    [Fact]
+    [PbpSamplesFact]
     public void PbpIsSingleDisc()
     {
         var pbpFiles = GetPbpFiles().ToArray();
@@ -174,7 +183,7 @@ public class PbpFileIntegrationTests : IDisposable
         }
     }
 
-    [Fact]
+    [PbpSamplesFact]
     public void DiscHasTocEntries()
     {
         var pbpFiles = GetPbpFiles().ToArray();
@@ -193,7 +202,7 @@ public class PbpFileIntegrationTests : IDisposable
         }
     }
 
-    [Fact]
+    [PbpSamplesFact]
     public void DiscIsoSizeMatchesOriginalBin()
     {
         var pairs = GetPbpWithBinCuePairs().ToArray();
@@ -213,7 +222,7 @@ public class PbpFileIntegrationTests : IDisposable
         }
     }
 
-    [Fact]
+    [PbpSamplesFact]
     public void DiscBlockCountIsPositive()
     {
         var pbpFiles = GetPbpFiles().ToArray();
@@ -231,7 +240,7 @@ public class PbpFileIntegrationTests : IDisposable
         }
     }
 
-    [Fact]
+    [PbpSamplesFact]
     public void ExtractToProducesCorrectIso()
     {
         var pairs = GetPbpWithBinCuePairs().ToArray();
@@ -276,7 +285,7 @@ public class PbpFileIntegrationTests : IDisposable
         pbp.Dispose();
     }
 
-    [Fact]
+    [PbpSamplesFact]
     public void ExtractToBinCueProducesValidFiles()
     {
         var pairs = GetPbpWithBinCuePairs().ToArray();
@@ -309,7 +318,7 @@ public class PbpFileIntegrationTests : IDisposable
         pbp.Dispose();
     }
 
-    [Fact]
+    [PbpSamplesFact]
     public void GeneratedCueSheetMatchesOriginal()
     {
         var pairs = GetPbpWithBinCuePairs().ToArray();
@@ -342,7 +351,7 @@ public class PbpFileIntegrationTests : IDisposable
                 .Select(l => l.Trim()));
     }
 
-    [Fact]
+    [PbpSamplesFact]
     public void ReadBlockProducesValidData()
     {
         var pbpFiles = GetPbpFiles().ToArray();
@@ -363,7 +372,7 @@ public class PbpFileIntegrationTests : IDisposable
         }
     }
 
-    [Fact]
+    [PbpSamplesFact]
     public void DisposeMultipleTimesDoesNotThrow()
     {
         var pbpFiles = GetPbpFiles().ToArray();
@@ -378,7 +387,7 @@ public class PbpFileIntegrationTests : IDisposable
         Assert.Null(exception);
     }
 
-    [Fact]
+    [PbpSamplesFact]
     public void OpenNonExistentFileReturnsFileNotFound()
     {
         var error = PbpFile.Open(@"D:\nonexistent_path_12345.pbp", out var pbp);

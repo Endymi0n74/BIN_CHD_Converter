@@ -25,7 +25,16 @@ fn scan_files(folder: String, mode: String, recursive: bool) -> Result<Vec<Strin
 }
 
 fn unique_path(path: PathBuf) -> PathBuf { if !path.exists() { return path; } let dir=path.parent().unwrap_or(Path::new("")); let stem=path.file_stem().unwrap_or_default().to_string_lossy(); let ext=path.extension().map(|x|format!(".{}",x.to_string_lossy())).unwrap_or_default(); for n in 1.. { let p=dir.join(format!("{stem} ({n}){ext}")); if !p.exists(){return p;} } unreachable!() }
-fn command_for(path: &Path, mode: &str) -> (&'static str, &'static str) { if mode=="verify" { return ("verify",""); } if mode=="extract" { return ("extractcd","cue"); } match path.extension().and_then(|x|x.to_str()).unwrap_or("").to_ascii_lowercase().as_str(){"cue"|"gdi"|"toc"=>("createcd","chd"),"iso"=>("createdvd","chd"),"raw"=>("createraw","chd"),_=>("createhd","chd")} }
+fn command_for(path: &Path, mode: &str) -> (&'static str, &'static str) { if mode=="verify" { return ("verify",""); } match path.extension().and_then(|x|x.to_str()).unwrap_or("").to_ascii_lowercase().as_str(){"cue"|"gdi"|"toc"=>("createcd","chd"),"iso"=>("createdvd","chd"),"raw"=>("createraw","chd"),_=>("createhd","chd")} }
+
+fn extraction_command(chdman: &Path, input: &Path) -> (&'static str, &'static str) {
+    let info = Command::new(chdman).arg("info").arg("-i").arg(input).output();
+    let text = info.map(|value| format!("{}\n{}", String::from_utf8_lossy(&value.stdout), String::from_utf8_lossy(&value.stderr)).to_ascii_lowercase()).unwrap_or_default();
+    if text.contains("dvd") { ("extractdvd", "iso") }
+    else if text.contains("hard disk") || text.contains("hdd") { ("extracthd", "img") }
+    else if text.contains("gd-rom") { ("extractcd", "gdi") }
+    else { ("extractcd", "cue") }
+}
 
 fn prepared_inputs(input: &Path) -> Result<(Vec<PathBuf>, Option<TempDir>), String> {
     let ext=input.extension().and_then(|x|x.to_str()).unwrap_or("").to_ascii_lowercase();
@@ -38,7 +47,7 @@ fn prepared_inputs(input: &Path) -> Result<(Vec<PathBuf>, Option<TempDir>), Stri
 #[tauri::command]
 fn process_batch(source:String, output:String, mode:String, recursive:bool, delete_source:bool) -> Result<Vec<String>,String> {
     let chdman=find_command(&["chdman"]).ok_or("chdman was not found. Install MAME first.")?; let files=scan_files(source.clone(),mode.clone(),recursive)?; let mut logs=Vec::new();
-    for item in files { let original=PathBuf::from(&item); let (inputs,_temp)=prepared_inputs(&original)?; let mut all_ok=true; for input in inputs { let (cmd,ext)=command_for(&input,&mode); let mut command=Command::new(&chdman); command.arg(cmd).arg("-i").arg(&input); let out=if mode=="verify"{None}else{let rel=if input.starts_with(&source){input.strip_prefix(&source).unwrap_or(&input)}else{Path::new(input.file_name().unwrap_or_default())};let target=Path::new(&output).join(rel).with_extension(ext);if let Some(p)=target.parent(){fs::create_dir_all(p).map_err(|e|e.to_string())?;}let unique=unique_path(target);command.arg("-o").arg(&unique);Some(unique)};let result=command.output().map_err(|e|e.to_string())?;if result.status.success(){logs.push(format!("OK: {}",input.display()));}else{all_ok=false;logs.push(format!("FAILED: {} — {}",input.display(),String::from_utf8_lossy(&result.stderr)));if let Some(p)=out{let _=fs::remove_file(p);}} } if all_ok&&delete_source{fs::remove_file(&original).map_err(|e|e.to_string())?;} }
+    for item in files { let original=PathBuf::from(&item); let (inputs,_temp)=prepared_inputs(&original)?; let mut all_ok=true; for input in inputs { let (cmd,ext)=if mode=="extract"{extraction_command(&chdman,&input)}else{command_for(&input,&mode)}; let mut command=Command::new(&chdman); command.arg(cmd).arg("-i").arg(&input); let out=if mode=="verify"{None}else{let rel=if input.starts_with(&source){input.strip_prefix(&source).unwrap_or(&input)}else{Path::new(input.file_name().unwrap_or_default())};let target=Path::new(&output).join(rel).with_extension(ext);if let Some(p)=target.parent(){fs::create_dir_all(p).map_err(|e|e.to_string())?;}let unique=unique_path(target);command.arg("-o").arg(&unique);Some(unique)};let result=command.output().map_err(|e|e.to_string())?;if result.status.success(){logs.push(format!("OK: {}",input.display()));}else{all_ok=false;logs.push(format!("FAILED: {} — {}",input.display(),String::from_utf8_lossy(&result.stderr)));if let Some(p)=out{let _=fs::remove_file(p);}} } if all_ok&&delete_source{fs::remove_file(&original).map_err(|e|e.to_string())?;} }
     Ok(logs)
 }
 
