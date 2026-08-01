@@ -1,0 +1,55 @@
+name: Next multi-platform builds
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: read
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-latest, rid: win-x64, triple: x86_64-pc-windows-msvc, exe: ".exe" }
+          - { os: ubuntu-latest, rid: linux-x64, triple: x86_64-unknown-linux-gnu, exe: "" }
+          - { os: ubuntu-24.04-arm, rid: linux-arm64, triple: aarch64-unknown-linux-gnu, exe: "" }
+          - { os: macos-15-intel, rid: osx-x64, triple: x86_64-apple-darwin, exe: "" }
+          - { os: macos-15, rid: osx-arm64, triple: aarch64-apple-darwin, exe: "" }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm, cache-dependency-path: next-app/package-lock.json }
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: 10.0.x }
+      - name: Linux desktop dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - name: Build native format helper
+        run: dotnet publish Next.FormatHelper/Next.FormatHelper.csproj -c Release -r ${{ matrix.rid }} -o helper
+      - name: Install frontend dependencies
+        working-directory: next-app
+        run: npm ci
+      - name: Install Tauri sidecar
+        shell: bash
+        run: |
+          mkdir -p next-app/src-tauri/bin
+          cp "helper/batch-format-helper${{ matrix.exe }}" "next-app/src-tauri/bin/batch-format-helper-${{ matrix.triple }}${{ matrix.exe }}"
+      - name: Build application packages
+        working-directory: next-app
+        run: npm run tauri build
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Batch_Convert_To_CHD_Next-${{ matrix.rid }}
+          path: |
+            next-app/src-tauri/target/release/bundle/**
+            next-app/src-tauri/target/release/batch-convert-to-chd-next${{ matrix.exe }}
+          if-no-files-found: error
