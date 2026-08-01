@@ -146,6 +146,32 @@ public class PathUtilsTests
     }
 
     [Fact]
+    public void GetUniqueFilePathReturnsDesiredPathWhenAvailable()
+    {
+        var desired = Path.Combine(Path.GetTempPath(), $"available_{Guid.NewGuid():N}.chd");
+        Assert.Equal(desired, PathUtils.GetUniqueFilePath(desired));
+    }
+
+    [Fact]
+    public void GetUniqueFilePathAddsNextAvailableNumericSuffix()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), $"PathUtils_{Guid.NewGuid():N}");
+        Directory.CreateDirectory(directory);
+        try
+        {
+            var desired = Path.Combine(directory, "game.chd");
+            File.WriteAllText(desired, string.Empty);
+            File.WriteAllText(Path.Combine(directory, "game (1).chd"), string.Empty);
+
+            Assert.Equal(Path.Combine(directory, "game (2).chd"), PathUtils.GetUniqueFilePath(desired));
+        }
+        finally
+        {
+            Directory.Delete(directory, true);
+        }
+    }
+
+    [Fact]
     public void SanitizeFileNameAllInvalidCharsReplaced()
     {
         const string input = "a<b>c:d\"e/f\\g|h?i*j";

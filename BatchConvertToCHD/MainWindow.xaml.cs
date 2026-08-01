@@ -714,12 +714,6 @@ internal partial class MainWindow : IDisposable
                 return;
             }
 
-            if (inputFolder.Equals(outputFolder, StringComparison.OrdinalIgnoreCase))
-            {
-                ShowError("Input and output folders must be different.");
-                return;
-            }
-
             var selectedFiles = _extractionFiles.Where(static f => f.IsSelected).Select(static f => f.FullPath).ToArray();
             if (selectedFiles.Length == 0)
             {
@@ -1036,12 +1030,6 @@ internal partial class MainWindow : IDisposable
             var outputFolder = PathUtils.ValidateAndNormalizePath(ConversionOutputFolderTextBox.Text, "Output CHD Folder", ShowError, LogMessage);
             if (inputFolder == null || outputFolder == null)
             {
-                return;
-            }
-
-            if (inputFolder.Equals(outputFolder, StringComparison.OrdinalIgnoreCase))
-            {
-                ShowError("Input and output folders must be different.");
                 return;
             }
 
@@ -1419,7 +1407,10 @@ internal partial class MainWindow : IDisposable
             var relativePath = PathUtils.GetSafeRelativePath(inputFolder, Path.GetDirectoryName(inputFile) ?? inputFolder);
             var targetDir = string.Equals(relativePath, ".", StringComparison.Ordinal) ? outputFolder : Path.Combine(outputFolder, relativePath);
 
-            outputChd = Path.Combine(targetDir, PathUtils.SanitizeFileName(chdBase) + FileExtensions.Chd);
+            var desiredOutputChd = Path.Combine(targetDir, PathUtils.SanitizeFileName(chdBase) + FileExtensions.Chd);
+            outputChd = PathUtils.GetUniqueFilePath(desiredOutputChd);
+            if (!string.Equals(outputChd, desiredOutputChd, StringComparison.OrdinalIgnoreCase))
+                LogMessage($" Output already exists; using: {Path.GetFileName(outputChd)}");
 
             string fileToProcess;
             if (ext.Equals(FileExtensions.Cso, StringComparison.OrdinalIgnoreCase))
@@ -1501,7 +1492,7 @@ internal partial class MainWindow : IDisposable
         var relativePath = PathUtils.GetSafeRelativePath(inputFolder, Path.GetDirectoryName(originalInputFile) ?? inputFolder);
         var targetDir = string.Equals(relativePath, ".", StringComparison.Ordinal) ? outputFolder : Path.Combine(outputFolder, relativePath);
         var chdBase = Path.GetFileNameWithoutExtension(extractedFilePath);
-        return Path.Combine(targetDir, PathUtils.SanitizeFileName(chdBase) + FileExtensions.Chd);
+        return PathUtils.GetUniqueFilePath(Path.Combine(targetDir, PathUtils.SanitizeFileName(chdBase) + FileExtensions.Chd));
     }
 
     private async Task<bool> ProcessCsoFileForConversionAsync(string inputFile, string originalName, string outputFolder, List<string> tempDirs, CancellationToken token, string chdmanPath, string outputChd, int cores, bool forceCd, bool forceDvd, int? timeoutMinutes, bool deleteOriginal, string inputFolder)
@@ -2048,17 +2039,11 @@ internal partial class MainWindow : IDisposable
             }
         }
 
-        var outputFile = Path.Combine(targetDir, fileName + outputExt);
-
-        // For DVD/HDD extraction: delete existing output file before writing
-        if (extractCommand is "extractdvd" or "extracthd")
-        {
-            if (File.Exists(outputFile))
-            {
-                LogMessage($"Overwriting: {fileName}{outputExt} already exists in output folder.");
-                await TryDeleteFileAsync(outputFile, "existing output file", CancellationToken.None);
-            }
-        }
+        var desiredOutputFile = Path.Combine(targetDir, fileName + outputExt);
+        var outputFile = PathUtils.GetUniqueFilePath(desiredOutputFile);
+        if (!string.Equals(outputFile, desiredOutputFile, StringComparison.OrdinalIgnoreCase))
+            LogMessage($" Output already exists; using: {Path.GetFileName(outputFile)}");
+        fileName = Path.GetFileNameWithoutExtension(outputFile);
 
         var success = false;
         try

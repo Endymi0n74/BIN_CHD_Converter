@@ -72,6 +72,27 @@ internal static class PathUtils
     }
 
     /// <summary>
+    /// Returns <paramref name="desiredPath"/> when it is available, otherwise
+    /// appends a numeric suffix such as " (1)" without overwriting an existing file.
+    /// </summary>
+    internal static string GetUniqueFilePath(string desiredPath)
+    {
+        if (!File.Exists(desiredPath)) return desiredPath;
+
+        var directory = Path.GetDirectoryName(desiredPath) ?? string.Empty;
+        var baseName = Path.GetFileNameWithoutExtension(desiredPath);
+        var extension = Path.GetExtension(desiredPath);
+
+        for (var suffix = 1; suffix < int.MaxValue; suffix++)
+        {
+            var candidate = Path.Combine(directory, $"{baseName} ({suffix}){extension}");
+            if (!File.Exists(candidate)) return candidate;
+        }
+
+        throw new IOException($"Could not create a unique file name for '{desiredPath}'.");
+    }
+
+    /// <summary>
     /// Computes a relative path from <paramref name="relativeTo"/> to <paramref name="path"/>,
     /// falling back to "." when the paths are on different drives/roots (which
     /// <see cref="Path.GetRelativePath"/> does not support and will throw for).
