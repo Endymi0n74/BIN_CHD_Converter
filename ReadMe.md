@@ -1,4 +1,4 @@
-[![Platform: Windows](https://img.shields.io/badge/Platform-Windows%20x64%20%7C%20ARM64-0078d7.svg)](https://www.microsoft.com/windows)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-0078d7.svg)](#macos-and-linux-cli)
 [![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512bd4.svg)](https://dotnet.microsoft.com/download/dotnet/10.0)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE.txt)
 [![GitHub release](https://img.shields.io/github/v/release/drpetersonfernandes/BatchConvertToCHD)](https://github.com/drpetersonfernandes/BatchConvertToCHD/releases)
@@ -167,3 +167,21 @@ This project is licensed under the **GNU General Public License v3.0**. See the 
 
 ---
 Developed by [Pure Logic Code](https://www.purelogiccode.com)
+
+## macOS and Linux CLI
+
+The `batchconverttochd` frontend supports batch conversion, extraction and
+verification on macOS/Linux, including recursive traversal, parallel jobs,
+tree preservation, dry runs and safe source deletion. Install `chdman` first
+(`brew install mame` on macOS or your distribution's `mame-tools` package), then:
+
+```sh
+chmod +x batchconverttochd.sh install-unix.sh
+sudo ./install-unix.sh
+batchconverttochd convert ~/ROMs ~/CHD -r -j 4
+batchconverttochd extract ~/CHD ~/Extracted -r --format auto
+batchconverttochd verify ~/CHD -r
+```
+
+The WPF graphical interface remains Windows-only; run
+`batchconverttochd --help` for all cross-platform CLI options.
