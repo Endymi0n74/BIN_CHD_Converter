@@ -513,7 +513,7 @@ internal partial class MainWindow : IDisposable
 
     private void DisplayConversionInstructionsInLog()
     {
-        LogMessage($"Welcome to {AppConfig.ApplicationName}. (Conversion Mode)");
+        LogMessage($"Welcome to {AppConfig.ApplicationName} v{typeof(MainWindow).Assembly.GetName().Version?.ToString(3)}. (Conversion Mode)");
         if (!_isChdmanAvailable)
         {
             LogWarning(" chdman.exe not found! Download it from https://github.com/rtissera/chdman/releases and place it in the application folder.");
@@ -524,14 +524,14 @@ internal partial class MainWindow : IDisposable
 
     private void DisplayVerificationInstructionsInLog()
     {
-        LogMessage($"Welcome to {AppConfig.ApplicationName}. (Verification Mode)");
+        LogMessage($"Welcome to {AppConfig.ApplicationName} v{typeof(MainWindow).Assembly.GetName().Version?.ToString(3)}. (Verification Mode)");
 
         LogMessage("--- Ready for Verification ---");
     }
 
     private void DisplayExtractionInstructionsInLog()
     {
-        LogMessage($"Welcome to {AppConfig.ApplicationName}. (Extraction Mode)");
+        LogMessage($"Welcome to {AppConfig.ApplicationName} v{typeof(MainWindow).Assembly.GetName().Version?.ToString(3)}. (Extraction Mode)");
 
         LogMessage("This feature extracts CHD files back to their original format (ISO/BIN/CUE etc.)");
         LogMessage("--- Ready for Extraction ---");
