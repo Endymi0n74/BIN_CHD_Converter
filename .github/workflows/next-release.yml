@@ -17,6 +17,8 @@ jobs:
           - { os: macos-15-intel, rid: osx-x64, triple: x86_64-apple-darwin, exe: "" }
           - { os: macos-15, rid: osx-arm64, triple: aarch64-apple-darwin, exe: "" }
     runs-on: ${{ matrix.os }}
+    env:
+      HAS_APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE != '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -37,11 +39,11 @@ jobs:
           mkdir -p next-app/src-tauri/bin
           cp "helper/batch-format-helper${{ matrix.exe }}" "next-app/src-tauri/bin/batch-format-helper-${{ matrix.triple }}${{ matrix.exe }}"
       - name: Build application packages (unsigned)
-        if: runner.os != 'macOS' || secrets.APPLE_CERTIFICATE == ''
+        if: runner.os != 'macOS' || env.HAS_APPLE_CERTIFICATE != 'true'
         working-directory: next-app
         run: npm run tauri build
       - name: Build application packages (Apple signed and notarized)
-        if: runner.os == 'macOS' && secrets.APPLE_CERTIFICATE != ''
+        if: runner.os == 'macOS' && env.HAS_APPLE_CERTIFICATE == 'true'
         working-directory: next-app
         run: npm run tauri build
         env:
