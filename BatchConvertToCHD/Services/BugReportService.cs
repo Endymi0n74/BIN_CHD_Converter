@@ -103,7 +103,7 @@ internal class BugReportService
                 message = formattedMessage,
                 applicationName = _applicationName,
                 version = versionString,
-                userInfo = Environment.UserName,
+                userInfo = "Not collected",
                 environment = AppConfig.BugReportEnvironment,
                 stackTrace
             };

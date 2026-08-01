@@ -36,11 +36,13 @@ public partial class App
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-        // Initialize services
-        SharedBugReportService = new BugReportService(AppConfig.BugReportApiUrl, AppConfig.BugReportApiKey, AppConfig.ApplicationName);
-        _bugReportService = SharedBugReportService;
-
-        _statsService = new StatsService(AppConfig.ApplicationStatsApiUrl, AppConfig.ApplicationStatsApiKey, AppConfig.ApplicationName);
+        // Network reporting is strictly opt-in; local logging remains enabled.
+        if (AppConfig.TelemetryEnabled)
+        {
+            SharedBugReportService = new BugReportService(AppConfig.BugReportApiUrl, AppConfig.BugReportApiKey, AppConfig.ApplicationName);
+            _bugReportService = SharedBugReportService;
+            _statsService = new StatsService(AppConfig.ApplicationStatsApiUrl, AppConfig.ApplicationStatsApiKey, AppConfig.ApplicationName);
+        }
 
         ConfigureSerilog();
 
@@ -71,7 +73,6 @@ public partial class App
                 restrictedToMinimumLevel: LogEventLevel.Debug,
                 outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}",
                 formatProvider: CultureInfo.InvariantCulture)
-            .WriteTo.Sink(new BugReportApiSink(_bugReportService!))
             .CreateLogger();
 
         Log.Information("=== Serilog initialized ===");
@@ -117,7 +118,8 @@ public partial class App
         base.OnStartup(e);
 
         // Record usage statistics on a background thread
-        _ = _statsService?.RecordUsageAsync();
+        if (AppConfig.TelemetryEnabled)
+            _ = _statsService?.RecordUsageAsync();
 
         // Preload assemblies on background thread to improve responsiveness
         _ = Task.Run(static () =>

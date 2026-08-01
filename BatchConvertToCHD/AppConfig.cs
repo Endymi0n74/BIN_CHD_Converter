@@ -16,6 +16,10 @@ internal static class AppConfig
     /// </summary>
     public static bool IsArm64 => RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
 
+    /// <summary>Network telemetry is disabled unless the user explicitly opts in.</summary>
+    public static bool TelemetryEnabled =>
+        string.Equals(Environment.GetEnvironmentVariable("BATCHCONVERT_TELEMETRY"), "1", StringComparison.Ordinal);
+
     /// <summary>
     /// Gets the appropriate chdman executable name based on the current architecture.
     /// Returns "chdman_arm64.exe" for ARM64 or "chdman.exe" for other architectures.
