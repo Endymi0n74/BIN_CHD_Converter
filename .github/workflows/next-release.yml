@@ -36,7 +36,12 @@ jobs:
         run: |
           mkdir -p next-app/src-tauri/bin
           cp "helper/batch-format-helper${{ matrix.exe }}" "next-app/src-tauri/bin/batch-format-helper-${{ matrix.triple }}${{ matrix.exe }}"
-      - name: Build application packages
+      - name: Build application packages (unsigned)
+        if: runner.os != 'macOS' || secrets.APPLE_CERTIFICATE == ''
+        working-directory: next-app
+        run: npm run tauri build
+      - name: Build application packages (Apple signed and notarized)
+        if: runner.os == 'macOS' && secrets.APPLE_CERTIFICATE != ''
         working-directory: next-app
         run: npm run tauri build
         env:
