@@ -10,3 +10,4 @@ riderModule.iml
 next-app/node_modules/
 next-app/dist/
 next-app/src-tauri/target/
+/work/

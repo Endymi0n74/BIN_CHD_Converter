@@ -11,6 +11,9 @@
 > and collision-safe renaming. The existing WPF client remains available while
 > advanced format parity is completed.
 
+PBP and CCD support is provided by the `Next.FormatHelper` NativeAOT sidecar.
+It is native code and does not require the .NET runtime on the destination PC.
+
 Build the lightweight client:
 
 ```sh
