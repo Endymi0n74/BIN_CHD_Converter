@@ -5,14 +5,16 @@
 
 # Batch Convert to CHD Next
 
-> **Next UI preview:** a new Tauri/Rust desktop client is available in
-> `next-app/`. It runs on Windows, macOS and Linux without .NET and currently
-> supports scanning, conversion, verification, extraction, same-folder output
-> and collision-safe renaming. The existing WPF client remains available while
-> advanced format parity is completed.
+> **Next desktop UI:** the lightweight Tauri/Rust client in `next-app/` runs on
+> Windows, macOS and Linux without requiring .NET. It supports scanning,
+> conversion, verification, automatic CD/DVD/HDD extraction, same-folder output,
+> collision-safe renaming, archives, PBP, CCD and CSO/CISO. The legacy WPF client
+> remains available for Windows users.
 
 PBP and CCD support is provided by the `Next.FormatHelper` NativeAOT sidecar.
 It is native code and does not require the .NET runtime on the destination PC.
+GitHub Actions produces Windows x64, Linux x64/ARM64 and macOS Intel/Apple
+Silicon packages from the same source tree.
 
 Build the lightweight client:
 
