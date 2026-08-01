@@ -9,6 +9,7 @@ tauri= {version="2",features= [] }
 tauri-plugin-dialog="2"
 serde= {version="1",features= ["derive"] }
 walkdir="2"
+tempfile="3"
 [profile.release]
 panic="abort"
 codegen-units=1
