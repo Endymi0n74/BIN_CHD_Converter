@@ -10,4 +10,9 @@ riderModule.iml
 next-app/node_modules/
 next-app/dist/
 next-app/src-tauri/target/
+next-app/src-tauri/bin/
+next-app/src-tauri/icons/android/
+next-app/src-tauri/icons/ios/
+next-app/src-tauri/icons/Square*Logo.png
+next-app/src-tauri/icons/StoreLogo.png
 /work/
