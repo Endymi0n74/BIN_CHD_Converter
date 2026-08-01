@@ -4,5 +4,5 @@
     <PublishAot>true</PublishAot><StripSymbols>true</StripSymbols><InvariantGlobalization>true</InvariantGlobalization>
     <AssemblyName>batch-format-helper</AssemblyName>
   </PropertyGroup>
-  <ItemGroup><ProjectReference Include="..\PBPSharp\PBPSharp.csproj"/><ProjectReference Include="..\CCDSharp\CCDSharp.csproj"/></ItemGroup>
+  <ItemGroup><ProjectReference Include="..\PBPSharp\PBPSharp.csproj"/><ProjectReference Include="..\CCDSharp\CCDSharp.csproj"/><ProjectReference Include="..\CSOSharp\CSOSharp.csproj"/></ItemGroup>
 </Project>

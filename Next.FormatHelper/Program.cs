@@ -1,10 +1,12 @@
 using CCDSharp;
 using PBPSharp;
 using PBPSharp.Models;
+using CSOSharp;
+using CSOSharp.Models;
 
-if (args.Length != 3 || args[0] is not ("pbp" or "ccd"))
+if (args.Length != 3 || args[0] is not ("pbp" or "ccd" or "cso"))
 {
-    Console.Error.WriteLine("Usage: batch-format-helper <pbp|ccd> <input> <output-directory>");
+    Console.Error.WriteLine("Usage: batch-format-helper <pbp|ccd|cso> <input> <output-directory>");
     return 2;
 }
 
@@ -19,6 +21,20 @@ try
     {
         var cue = Path.Combine(output, Path.GetFileNameWithoutExtension(input) + ".cue");
         Console.WriteLine(CcdConverter.ConvertToCueBin(input, cue, copyBinFile: true));
+        return 0;
+    }
+
+    if (mode == "cso")
+    {
+        var iso = Path.Combine(output, Path.GetFileNameWithoutExtension(input) + ".iso");
+        var openResult = CsoFile.Open(input, out var cso);
+        if (openResult != CsoError.None || cso is null) throw new InvalidDataException($"Unable to open CSO: {openResult}");
+        using (cso)
+        {
+            var result = cso.ExtractToIso(iso);
+            if (result != CsoError.None) throw new InvalidDataException($"Unable to extract CSO: {result}");
+        }
+        Console.WriteLine(iso);
         return 0;
     }
 
