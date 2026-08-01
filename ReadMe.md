@@ -1,9 +1,9 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-0078d7.svg)](#macos-and-linux-cli)
 [![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512bd4.svg)](https://dotnet.microsoft.com/download/dotnet/10.0)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE.txt)
-[![GitHub release](https://img.shields.io/github/v/release/drpetersonfernandes/BatchConvertToCHD)](https://github.com/drpetersonfernandes/BatchConvertToCHD/releases)
+[![GitHub release](https://img.shields.io/github/v/release/Endymi0n74/Batch_Convert_To_CHD_Next)](https://github.com/Endymi0n74/Batch_Convert_To_CHD_Next/releases)
 
-# Batch Convert to CHD
+# Batch Convert to CHD Next
 
 **Batch Convert to CHD** is a high-performance Windows desktop utility designed to streamline the conversion of various disk image formats into the **Compressed Hunks of Data (CHD)** format.
 
@@ -98,7 +98,7 @@ The application implements priority-based logic to ensure compatibility:
 
 ## 📥 Installation
 
-1.  Download the portable archive for your processor (`win-x64` or `win-arm64`) from the [Releases](https://github.com/Endymi0n74/Batchconverttochd/releases) page.
+1.  Download the portable archive for your processor (`win-x64` or `win-arm64`) from the [Releases](https://github.com/Endymi0n74/Batch_Convert_To_CHD_Next/releases) page.
 2.  Extract the contents to a permanent folder.
 3.  **Important**: Ensure all `.exe` files (including ARM64 variants) remain in the same directory as `BatchConvertToCHD.exe`.
 4.  Launch the application.
@@ -145,7 +145,7 @@ BatchConvertToCHD.exe "C:\ROMs\MyGames"
 
 ## 🤝 Contributing & Support
 
-If you encounter issues or have feature requests, please use the [GitHub Issues](https://github.com/drpetersonfernandes/BatchConvertToCHD/issues) tracker.
+If you encounter issues or have feature requests, please use the [GitHub Issues](https://github.com/Endymi0n74/Batch_Convert_To_CHD_Next/issues) tracker.
 
 **Support the Project:**
 If this tool saves you time, consider supporting further development:
@@ -181,7 +181,8 @@ tree preservation, dry runs and safe source deletion. Install `chdman` first
 
 ```sh
 chmod +x batchconverttochd.sh install-unix.sh
-sudo ./install-unix.sh
+sudo ./install-unix.sh               # system-wide
+./install-unix.sh --user             # or only for the current user
 batchconverttochd convert ~/ROMs ~/CHD -r -j 4
 batchconverttochd extract ~/CHD ~/Extracted -r --format auto
 batchconverttochd verify ~/CHD -r
