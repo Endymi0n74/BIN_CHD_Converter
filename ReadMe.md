@@ -98,10 +98,14 @@ The application implements priority-based logic to ensure compatibility:
 
 ## 📥 Installation
 
-1.  Download the latest binary from the [Releases](https://github.com/drpetersonfernandes/BatchConvertToCHD/releases) page.
+1.  Download the portable archive for your processor (`win-x64` or `win-arm64`) from the [Releases](https://github.com/Endymi0n74/Batchconverttochd/releases) page.
 2.  Extract the contents to a permanent folder.
 3.  **Important**: Ensure all `.exe` files (including ARM64 variants) remain in the same directory as `BatchConvertToCHD.exe`.
 4.  Launch the application.
+
+The portable Windows builds are self-contained: **the .NET runtime does not
+need to be installed** on the destination PC. Each archive only contains the
+`chdman` and `7za` binaries needed by its target architecture.
 
 ---
 

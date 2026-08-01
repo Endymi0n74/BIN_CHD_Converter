@@ -15,6 +15,9 @@
     <DebugType>embedded</DebugType>
     <DebugSymbols>true</DebugSymbols>
     <Company>PureLogicCode.com</Company>
+    <!-- Release binaries include the runtime: users do not need to install .NET. -->
+    <DebugType Condition="'$(Configuration)' == 'Release'">none</DebugType>
+    <DebugSymbols Condition="'$(Configuration)' == 'Release'">false</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,6 +32,16 @@
     <None Update="7za_arm64.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <!-- Do not ship native tools for the other CPU architecture. -->
+  <ItemGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+    <None Update="7za_arm64.exe" CopyToPublishDirectory="Never" />
+    <None Update="chdman_arm64.exe" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(RuntimeIdentifier)' == 'win-arm64'">
+    <None Update="7za.exe" CopyToPublishDirectory="Never" />
+    <None Update="chdman.exe" CopyToPublishDirectory="Never" />
   </ItemGroup>
 
   <ItemGroup>
