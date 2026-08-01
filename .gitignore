@@ -7,3 +7,6 @@ riderModule.iml
 [Bb]atch[Cc]onvertTo[Cc][Hh][Dd]/[Rr]eferences/
 *.DotSettings.user
 *.user
+next-app/node_modules/
+next-app/dist/
+next-app/src-tauri/target/

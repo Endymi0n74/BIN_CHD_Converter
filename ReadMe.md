@@ -5,6 +5,20 @@
 
 # Batch Convert to CHD Next
 
+> **Next UI preview:** a new Tauri/Rust desktop client is available in
+> `next-app/`. It runs on Windows, macOS and Linux without .NET and currently
+> supports scanning, conversion, verification, extraction, same-folder output
+> and collision-safe renaming. The existing WPF client remains available while
+> advanced format parity is completed.
+
+Build the lightweight client:
+
+```sh
+cd next-app
+npm install
+npm run tauri build
+```
+
 **Batch Convert to CHD** is a high-performance Windows desktop utility designed to streamline the conversion of various disk image formats into the **Compressed Hunks of Data (CHD)** format.
 
 ![Batch Convert to CHD Screenshot](screenshot.png)
