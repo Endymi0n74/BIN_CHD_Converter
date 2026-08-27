@@ -4,18 +4,20 @@ import { listen } from '@tauri-apps/api/event';
 import { open } from '@tauri-apps/plugin-dialog';
 
 const app = document.querySelector('#app');
-app.innerHTML = `<header><div><h1>Batch Convert to CHD <b>Next</b></h1><p>Windows · macOS · Linux</p></div><span id="dep">Checking CHDMAN…</span></header>
+app.innerHTML = `<header><div><h1>BIN CHD <b>Converter</b></h1><p>Windows · macOS · Linux</p></div><span id="dep">Checking CHDMAN…</span></header>
 <main><section class="panel"><nav><button class="tab active" data-mode="convert">Convert</button><button class="tab" data-mode="verify">Verify</button><button class="tab" data-mode="extract">Extract</button></nav>
 <label>Source folder</label><div class="field"><input id="source" readonly><button id="pick-source">Browse</button></div>
 <div id="output-row"><label>Output folder</label><div class="field"><input id="output" readonly><button id="pick-output">Browse</button></div></div>
 <div class="options"><label><input type="checkbox" id="recursive" checked> Include subfolders</label><label><input type="checkbox" id="delete"> Delete source after success</label></div>
+<div class="options" id="format-row" hidden><label for="format">Extract format</label><select id="format"><option value="auto">Auto-detect</option><option value="cue">BIN + CUE (CD / GD-ROM)</option><option value="iso">ISO (DVD)</option><option value="img">IMG (HDD)</option></select></div>
 <div class="summary"><strong id="count">0</strong><span>compatible files</span></div>
 <div class="progress-card" id="progress-card" hidden><div class="progress-head"><strong id="progress-percent">0%</strong><span id="progress-file">Waiting…</span></div><div class="progress-track"><i id="progress-bar"></i></div><div class="metrics"><span>File <b id="metric-file">0/0</b></span><span>Elapsed <b id="metric-elapsed">00:00</b></span><span>Remaining <b id="metric-eta">--:--</b></span></div></div>
-<button class="primary" id="start">Start conversion</button></section>
+<div class="action-row"><button class="primary" id="start">Start conversion</button><button class="danger" id="cancel" hidden>Cancel progress</button></div></section>
 <section class="console"><div class="console-title">Detailed activity log <button id="clear">Clear</button></div><pre id="log">Ready.</pre></section></main>`;
 
 let mode = 'convert';
 let lastLoggedProgress = -1;
+let running = false;
 const $ = selector => document.querySelector(selector);
 const clock = () => new Date().toLocaleTimeString([], { hour12: false });
 const log = message => { $('#log').textContent += `\n[${clock()}] ${message}`; $('#log').scrollTop = $('#log').scrollHeight; };
@@ -65,25 +67,38 @@ $('#pick-source').onclick = () => pick('#source');
 $('#pick-output').onclick = () => pick('#output');
 $('#recursive').onchange = scan;
 $('#clear').onclick = () => $('#log').textContent = '';
+$('#cancel').onclick = async () => {
+  const wasRunning = await invoke('cancel_batch');
+  log(wasRunning ? 'CANCEL REQUESTED: stopping current file…' : 'No running process to cancel.');
+};
 document.querySelectorAll('.tab').forEach(button => button.onclick = () => {
   document.querySelectorAll('.tab').forEach(item => item.classList.remove('active'));
   button.classList.add('active'); mode = button.dataset.mode;
-  $('#output-row').hidden = mode === 'verify';
-  $('#start').textContent = mode === 'convert' ? 'Start conversion' : mode === 'extract' ? 'Start extraction' : 'Start verification';
+$('#output-row').hidden = mode === 'verify';
+$('#format-row').hidden = mode !== 'extract';
+$('#start').textContent = mode === 'convert' ? 'Start conversion' : mode === 'extract' ? 'Start extraction' : 'Start verification';
   scan();
 });
 
 $('#start').onclick = async () => {
+  if (running) return; // disable re-entry while a batch is in flight
   const source = $('#source').value, output = $('#output').value || source;
   if (!source) return log('Select a source folder.');
-  $('#start').disabled = true; $('#progress-card').hidden = false; $('#progress-bar').style.width = '0%'; lastLoggedProgress = -1;
+  running = true;
+  $('#start').disabled = true; $('#cancel').hidden = false;
+  $('#progress-card').hidden = false; $('#progress-bar').style.width = '0%'; lastLoggedProgress = -1;
   log(`BATCH START: mode=${mode}, source="${source}", output="${output}", recursive=${$('#recursive').checked}, deleteSource=${$('#delete').checked}`);
   try {
-    const lines = await invoke('process_batch', { source, output, mode, recursive: $('#recursive').checked, deleteSource: $('#delete').checked });
-    log(`BATCH RESULT: ${lines.filter(line => line.startsWith('OK:')).length} success, ${lines.filter(line => line.startsWith('FAILED:')).length} failed.`);
-    await scan();
+    const lines = await invoke('process_batch', { source, output, mode, recursive: $('#recursive').checked, deleteSource: $('#delete').checked, extractFormat: $('#format').value });
+    const canceled = lines.some(line => line.startsWith('CANCELED:'));
+    log(`BATCH RESULT: ${lines.filter(line => line.startsWith('OK:')).length} success, ${lines.filter(line => line.startsWith('FAILED:')).length} failed${canceled ? ', canceled' : ''}.`);
+    if (canceled) $('#progress-file').textContent = 'Canceled';
+    else await scan();
   } catch (error) { log(`ERROR: ${error}`); }
-  finally { $('#start').disabled = false; }
+  finally {
+    running = false;
+    $('#start').disabled = false; $('#cancel').hidden = true;
+  }
 };
 
 invoke('dependency_status').then(status => {

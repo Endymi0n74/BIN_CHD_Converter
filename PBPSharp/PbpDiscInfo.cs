@@ -148,6 +148,13 @@ public sealed class PbpDiscInfo
             }
         }
 
+        // A disc with no ISO index entries is not a usable PlayStation disc image. The container
+        // header parsed correctly, so this almost always means the file ends before its data area
+        // (truncated download). The dedicated exception lets callers report that cause instead of
+        // a generic corrupt-file error.
+        if (isoIndex.Count == 0)
+            throw new NoIsoIndexException();
+
         return isoIndex;
     }
 

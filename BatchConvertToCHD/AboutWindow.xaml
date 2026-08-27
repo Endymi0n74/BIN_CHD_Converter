@@ -3,7 +3,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-        Title="About Batch Convert to CHD"
+        Title="About BIN CHD Converter"
         Width="700" MinWidth="450"
         Height="700" MinHeight="500"
         WindowStartupLocation="CenterScreen"
@@ -18,9 +18,9 @@
         </Grid.RowDefinitions>
 
         <ui:TitleBar Grid.Row="0"
-                     Title="About Batch Convert to CHD"
+                     Title="About BIN CHD Converter"
                      Icon="pack://application:,,,/images/logo.png"
-                     ToolTip="About Batch Convert to CHD - Title bar" />
+                     ToolTip="About BIN CHD Converter - Title bar" />
 
         <Grid Grid.Row="1" Margin="20" ToolTip="Application information and credits">
             <Grid.RowDefinitions>
@@ -34,14 +34,14 @@
             <!-- Logo Section -->
             <Border Grid.Row="0" Style="{StaticResource StatCard}" Margin="0,0,0,15" Padding="15" ToolTip="Application Logo">
                 <StackPanel HorizontalAlignment="Center" ToolTip="Logo section">
-                    <Image Width="{StaticResource AboutLogoSize}" Height="{StaticResource AboutLogoSize}" Source="pack://application:,,,/images/logo.png" ToolTip="Batch Convert to CHD application icon" />
+                    <Image Width="{StaticResource AboutLogoSize}" Height="{StaticResource AboutLogoSize}" Source="pack://application:,,,/images/logo.png" ToolTip="BIN CHD Converter application icon" />
                 </StackPanel>
             </Border>
 
             <!-- Title & Version Section -->
             <Border Grid.Row="1" Style="{StaticResource StatCard}" Margin="0,0,0,15" Padding="15" ToolTip="Application name and version">
                 <StackPanel ToolTip="Application name and version information">
-                    <TextBlock Style="{StaticResource AboutTitleStyle}" Text="Batch Convert to CHD" ToolTip="Batch Convert to CHD" />
+                    <TextBlock Style="{StaticResource AboutTitleStyle}" Text="BIN CHD Converter" ToolTip="BIN CHD Converter" />
                     <TextBlock x:Name="AppVersionTextBlock" Margin="0,8,0,0" Text=""
                                Style="{StaticResource AboutSubtitleStyle}"
                                Foreground="{DynamicResource AccentFillColorDefaultBrush}"

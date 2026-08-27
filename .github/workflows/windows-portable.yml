@@ -1,13 +1,10 @@
 name: Windows portable builds
-
 on:
   workflow_dispatch:
   release:
     types: [published]
-
 permissions:
-  contents: read
-
+  contents: write
 jobs:
   publish:
     strategy:
@@ -19,13 +16,12 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-      - name: Publish autonomous application
+      - name: Publish autonomous legacy application
         run: dotnet publish BatchConvertToCHD/BatchConvertToCHD.csproj -p:PublishProfile=${{ matrix.rid }} -o publish/${{ matrix.rid }}
-      - name: Create archive
+      - name: Create portable archive
         shell: pwsh
-        run: Compress-Archive -Path "publish/${{ matrix.rid }}/*" -DestinationPath "BatchConvertToCHD-${{ matrix.rid }}-portable.zip"
-      - uses: actions/upload-artifact@v4
+        run: Compress-Archive -Path "publish/${{ matrix.rid }}/*" -DestinationPath "BIN_CHD_Converter-${{ matrix.rid }}-legacy-portable.zip"
+      - name: Attach archive to release
+        uses: softprops/action-gh-release@v2
         with:
-          name: BatchConvertToCHD-${{ matrix.rid }}-portable
-          path: BatchConvertToCHD-${{ matrix.rid }}-portable.zip
-          if-no-files-found: error
+          files: BIN_CHD_Converter-${{ matrix.rid }}-legacy-portable.zip

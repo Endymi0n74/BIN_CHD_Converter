@@ -1,11 +1,13 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-0078d7.svg)](#macos-and-linux-cli)
 [![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512bd4.svg)](https://dotnet.microsoft.com/download/dotnet/10.0)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE.txt)
-[![GitHub release](https://img.shields.io/github/v/release/Endymi0n74/Batch_Convert_To_CHD_Next)](https://github.com/Endymi0n74/Batch_Convert_To_CHD_Next/releases)
+[![GitHub release](https://img.shields.io/github/v/release/Endymi0n74/BIN_CHD_Converter)](https://github.com/Endymi0n74/BIN_CHD_Converter/releases)
 
-# Batch Convert to CHD Next
+# BIN CHD Converter
 
-> **Next desktop UI:** the lightweight Tauri/Rust client in `next-app/` runs on
+> **BIN CHD Converter** (formerly *Batch Convert to CHD Next*) is a desktop utility
+> to convert disk images to CHD and to extract CHD files back to **BIN/CUE** (CD),
+> ISO (DVD) or IMG (HDD). The lightweight Tauri/Rust client in `next-app/` runs on
 > Windows, macOS and Linux without requiring .NET. It supports scanning,
 > conversion, verification, automatic CD/DVD/HDD extraction, same-folder output,
 > collision-safe renaming, archives, PBP, CCD and CSO/CISO. The legacy WPF client
@@ -24,11 +26,11 @@ npm install
 npm run tauri build
 ```
 
-**Batch Convert to CHD** is a high-performance Windows desktop utility designed to streamline the conversion of various disk image formats into the **Compressed Hunks of Data (CHD)** format.
+**BIN CHD Converter** is a high-performance desktop utility designed to streamline the conversion of various disk image formats into the **Compressed Hunks of Data (CHD)** format, and the extraction of CHD files back to **BIN/CUE**, ISO or IMG.
 
-![Batch Convert to CHD Screenshot](screenshot.png)
-![Batch Convert to CHD Screenshot](screenshot2.png)
-![Batch Convert to CHD Screenshot](screenshot3.png)
+![BIN CHD Converter Screenshot](screenshot.png)
+![BIN CHD Converter Screenshot](screenshot2.png)
+![BIN CHD Converter Screenshot](screenshot3.png)
 
 ## 🚀 Key Features
 
@@ -45,7 +47,7 @@ npm run tauri build
 ### 🛠️ Intelligent Conversion & Extraction
 *   **Automated Batch Processing**: Convert entire directories of disk images with real-time progress monitoring and immediate cancellation response.
 *   **Recursive Structure Preservation**: Maintains your original directory hierarchy in the output folder when processing subfolders.
-*   **Robust Extraction**: Supports extracting CHD files back to **.cue (CD)**, **.iso (DVD)**, **.gdi (Dreamcast/Naomi)**, and **.img (HDD)** with intelligent metadata auto-detection using the [CHDSharp](https://www.nuget.org/packages/CHDSharp) library.
+*   **CHD → BIN/CUE Extraction**: Extracts CHD files back to **.bin + .cue** (CD/GD-ROM), **.iso** (DVD) or **.img** (HDD), with automatic type detection or an explicit format choice, using the [CHDSharp](https://www.nuget.org/packages/CHDSharp) library (WPF) / `chdman` (Tauri).
 *   **Archive Integration**: Transparently handles `.zip`, `.7z`, and `.rar` archives, extracting and processing contents automatically while respecting cancellation tokens. Includes a 7za.exe fallback for `.7z` files that SharpCompress cannot extract.
 *   **CloneCD Support**: Convert CloneCD `.ccd` disc images to CHD format via the [CCDSharp](https://) library. Automatically generates CUE/BIN from `.ccd`/`.img` sets.
 *   **CSO Decompression**: Built-in support for `.cso` and `.ciso` (Compressed ISO) files via the [CSOSharp](https://github.com/PureLogicCode/CSOSharp) library (supports deflate/zlib and LZ4).
@@ -74,9 +76,9 @@ npm run tauri build
 
 | Category             | Formats                                                    |
 |:---------------------|:-----------------------------------------------------------|
-| **Standard Images**  | `.iso`, `.cue` (+`.bin`), `.img`, `.ccd` (+`.img`), `.raw`, `.toc` |
+| **Standard Images**  | `.iso`, `.cue` (+`.bin`), `.img`, `.ccd` (+`.img`), `.raw`, `.toc`, `.mds` (+`.mdf`/split parts) |
 | **Console Specific** | `.gdi` (Dreamcast), `.pbp` (PlayStation)                   |
-| **Compressed**       | `.cso` (Compressed ISO)                                    |
+| **Compressed**       | `.cso`/`.ciso`, `.ecm` (ECM image), `.zip`, `.7z`, `.rar` |
 | **Archives**         | `.zip`, `.7z`, `.rar`                                      |
 | **Output**           | `.chd` (Compressed Hunks of Data)                          |
 
@@ -117,9 +119,9 @@ The application implements priority-based logic to ensure compatibility:
 
 ## 📥 Installation
 
-1.  Download the portable archive for your processor (`win-x64` or `win-arm64`) from the [Releases](https://github.com/Endymi0n74/Batch_Convert_To_CHD_Next/releases) page.
+1.  Download the portable archive for your platform (`windows-x64`, `windows-arm64`, `macos-x64`, `macos-arm64`, `linux-x64` or `linux-arm64`) from the [Releases](https://github.com/Endymi0n74/BIN_CHD_Converter/releases) page.
 2.  Extract the contents to a permanent folder.
-3.  **Important**: Ensure all `.exe` files (including ARM64 variants) remain in the same directory as `BatchConvertToCHD.exe`.
+3.  **Important**: Keep the application executable and its bundled `chdman`/`batch-format-helper` sidecars together in the extracted directory.
 4.  Launch the application.
 
 The portable Windows builds are self-contained: **the .NET runtime does not
@@ -149,7 +151,7 @@ BatchConvertToCHD.exe "C:\ROMs\MyGames"
 1.  Navigate to the **Extract CHD Files** tab.
 2.  Select your **Source Folder** (containing `.chd` files).
 3.  Select your **Output Folder**.
-4.  Choose the desired output format (Auto-detect, CD `.cue`, DVD `.iso`, Dreamcast `.gdi`, HDD `.img`).
+4.  Choose the desired output format (Auto-detect, **BIN/CUE** for CD/GD-ROM, DVD `.iso`, HDD `.img`).
 5.  *(Optional)* Enable "Include subfolders" to process nested directories.
 6.  *(Optional)* Enable "Delete original CHD files" to clean up after successful extraction.
 7.  Click **Start Extraction**.
@@ -164,7 +166,7 @@ BatchConvertToCHD.exe "C:\ROMs\MyGames"
 
 ## 🤝 Contributing & Support
 
-If you encounter issues or have feature requests, please use the [GitHub Issues](https://github.com/Endymi0n74/Batch_Convert_To_CHD_Next/issues) tracker.
+If you encounter issues or have feature requests, please use the [GitHub Issues](https://github.com/Endymi0n74/BIN_CHD_Converter/issues) tracker.
 
 **Support the Project:**
 If this tool saves you time, consider supporting further development:

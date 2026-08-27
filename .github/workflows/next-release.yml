@@ -1,35 +1,38 @@
-name: Next multi-platform builds
+name: Portable multi-platform builds
 on:
   workflow_dispatch:
   push:
     tags: ["v*"]
 permissions:
-  contents: read
+  contents: write
 jobs:
   build:
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { os: windows-latest, rid: win-x64, triple: x86_64-pc-windows-msvc, exe: ".exe" }
-          - { os: ubuntu-latest, rid: linux-x64, triple: x86_64-unknown-linux-gnu, exe: "" }
-          - { os: ubuntu-24.04-arm, rid: linux-arm64, triple: aarch64-unknown-linux-gnu, exe: "" }
-          - { os: macos-15-intel, rid: osx-x64, triple: x86_64-apple-darwin, exe: "" }
-          - { os: macos-15, rid: osx-arm64, triple: aarch64-apple-darwin, exe: "" }
+          - { os: windows-latest, rid: win-x64, triple: x86_64-pc-windows-msvc, exe: ".exe", archive: zip }
+          - { os: windows-latest, rid: win-arm64, triple: aarch64-pc-windows-msvc, exe: ".exe", archive: zip }
+          - { os: ubuntu-24.04, rid: linux-x64, triple: x86_64-unknown-linux-gnu, exe: "", archive: tar.gz }
+          - { os: ubuntu-24.04-arm, rid: linux-arm64, triple: aarch64-unknown-linux-gnu, exe: "", archive: tar.gz }
+          - { os: macos-15-intel, rid: osx-x64, triple: x86_64-apple-darwin, exe: "", archive: tar.gz }
+          - { os: macos-15, rid: osx-arm64, triple: aarch64-apple-darwin, exe: "", archive: tar.gz }
     runs-on: ${{ matrix.os }}
-    env:
-      HAS_APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE != '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 24, cache: npm, cache-dependency-path: next-app/package-lock.json }
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: next-app/package-lock.json
       - uses: actions/setup-dotnet@v4
-        with: { dotnet-version: 10.0.x }
+        with:
+          dotnet-version: 10.0.x
       - name: Linux desktop dependencies
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
       - name: Build native format helper
-        run: dotnet publish Next.FormatHelper/Next.FormatHelper.csproj -c Release -r ${{ matrix.rid }} -o helper
+        run: dotnet publish Next.FormatHelper/Next.FormatHelper.csproj -c Release -r ${{ matrix.rid }} -o helper --self-contained true
       - name: Install frontend dependencies
         working-directory: next-app
         run: npm ci
@@ -38,25 +41,33 @@ jobs:
         run: |
           mkdir -p next-app/src-tauri/bin
           cp "helper/batch-format-helper${{ matrix.exe }}" "next-app/src-tauri/bin/batch-format-helper-${{ matrix.triple }}${{ matrix.exe }}"
-      - name: Build application packages (unsigned)
-        if: runner.os != 'macOS' || env.HAS_APPLE_CERTIFICATE != 'true'
+      - name: Build frontend
         working-directory: next-app
-        run: npm run tauri build
-      - name: Build application packages (Apple signed and notarized)
-        if: runner.os == 'macOS' && env.HAS_APPLE_CERTIFICATE == 'true'
+        run: npm run build
+      - name: Build portable application binary
+        shell: bash
         working-directory: next-app
-        run: npm run tauri build
-        env:
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          mkdir -p portable
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            cargo build --release --manifest-path src-tauri/Cargo.toml
+            cp src-tauri/target/release/bin-chd-converter.exe portable/BIN_CHD_Converter.exe
+            cp src-tauri/bin/batch-format-helper-${{ matrix.triple }}.exe portable/
+            7z a "../BIN_CHD_Converter-${{ matrix.rid }}-portable.zip" ./portable/*
+          else
+            cargo build --release --manifest-path src-tauri/Cargo.toml
+            cp src-tauri/target/release/bin-chd-converter portable/BIN_CHD_Converter
+            cp src-tauri/bin/batch-format-helper-${{ matrix.triple }} portable/
+            tar -czf "../BIN_CHD_Converter-${{ matrix.rid }}-portable.tar.gz" -C portable .
+          fi
       - uses: actions/upload-artifact@v4
         with:
-          name: Batch_Convert_To_CHD_Next-${{ matrix.rid }}
-          path: |
-            next-app/src-tauri/target/release/bundle/**
-            next-app/src-tauri/target/release/batch-convert-to-chd-next${{ matrix.exe }}
+          name: BIN_CHD_Converter-${{ matrix.rid }}-portable
+          path: BIN_CHD_Converter-${{ matrix.rid }}-portable.*
           if-no-files-found: error
+      - name: Attach archive to GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: BIN_CHD_Converter-${{ matrix.rid }}-portable.*
+          generate_release_notes: true

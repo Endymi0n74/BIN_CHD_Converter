@@ -65,7 +65,7 @@ internal static class AppConfig
     /// <summary>
     /// The canonical name of this application, used for API calls, window titles, and mutex naming.
     /// </summary>
-    public const string ApplicationName = "BatchConvertToCHD";
+    public const string ApplicationName = "BIN_CHD_Converter";
 
     /// <summary>
     /// The environment identifier sent with bug reports ("Production" or "Development").

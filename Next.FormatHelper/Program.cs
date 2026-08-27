@@ -3,10 +3,12 @@ using PBPSharp;
 using PBPSharp.Models;
 using CSOSharp;
 using CSOSharp.Models;
+using FormatHelper.Formats.Ecm;
+using FormatHelper.Formats.Mds;
 
-if (args.Length != 3 || args[0] is not ("pbp" or "ccd" or "cso"))
+if (args.Length != 3 || args[0] is not ("pbp" or "ccd" or "cso" or "ecm" or "mds"))
 {
-    Console.Error.WriteLine("Usage: batch-format-helper <pbp|ccd|cso> <input> <output-directory>");
+    Console.Error.WriteLine("Usage: batch-format-helper <pbp|ccd|cso|ecm|mds> <input> <output-directory>");
     return 2;
 }
 
@@ -35,6 +37,28 @@ try
             if (result != CsoError.None) throw new InvalidDataException($"Unable to extract CSO: {result}");
         }
         Console.WriteLine(iso);
+        return 0;
+    }
+
+    if (mode == "ecm")
+    {
+        var decoded = Path.Combine(output, EcmImageDecoder.GetDecodedFileName(input));
+        var result = EcmImageDecoder.DecodeAsync(input, decoded, Console.Error.WriteLine, default)
+            .GetAwaiter().GetResult();
+        if (!result.Success) throw new InvalidDataException($"Unable to decode ECM: {result.FailureReason}");
+        Console.WriteLine(decoded);
+        return 0;
+    }
+
+    if (mode == "mds")
+    {
+        var disc = MdsParser.Parse(input);
+        var prepared = MdsInputPreparer.PrepareAsync(disc, output, Console.Error.WriteLine, default)
+            .GetAwaiter().GetResult();
+        if (!prepared.Success) throw new InvalidDataException($"Unable to prepare MDS: {prepared.FailureReason}");
+        var target = prepared.CuePath ?? prepared.DvdImagePath;
+        if (target is null) throw new InvalidDataException("MDS preparation produced no convertible output");
+        Console.WriteLine(target);
         return 0;
     }
 

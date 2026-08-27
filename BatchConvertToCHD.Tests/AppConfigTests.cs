@@ -52,7 +52,7 @@ public class AppConfigTests
     [Fact]
     public void ApplicationNameIsCorrect()
     {
-        Assert.Equal("BatchConvertToCHD", AppConfig.ApplicationName);
+        Assert.Equal("BIN_CHD_Converter", AppConfig.ApplicationName);
     }
 
     [Fact]
