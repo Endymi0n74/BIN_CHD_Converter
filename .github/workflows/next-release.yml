@@ -46,12 +46,12 @@ jobs:
       - name: Build frontend
         working-directory: next-app
         run: npm run build
-      - name: Build portable application binary
+      - name: Build portable application bundle
         shell: bash
         working-directory: next-app
         run: |
           mkdir -p portable
-          cargo build --release --target "${{ matrix.triple }}" --manifest-path src-tauri/Cargo.toml
+          npx tauri build --no-bundle --target "${{ matrix.triple }}"
           if [[ "${{ runner.os }}" == "Windows" ]]; then
             cp "src-tauri/target/${{ matrix.triple }}/release/bin-chd-converter.exe" portable/BIN_CHD_Converter.exe
             cp "src-tauri/bin/batch-format-helper-${{ matrix.triple }}.exe" portable/
