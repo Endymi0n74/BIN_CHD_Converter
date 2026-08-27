@@ -8,7 +8,7 @@ namespace BatchConvertToCHD;
 /// </summary>
 internal static class AppConfig
 {
-    private static readonly byte[] KeySalt = "BatchConvertToCHD_v1"u8.ToArray();
+    private static readonly byte[] KeySalt = "BIN_CHD_Converter_v1"u8.ToArray();
     private static string? _decryptedApiKey;
 
     /// <summary>
@@ -60,7 +60,7 @@ internal static class AppConfig
     /// <summary>
     /// The GitHub API URL for fetching the latest release information.
     /// </summary>
-    public const string GitHubApiLatestReleaseUrl = "https://api.github.com/repos/drpetersonfernandes/BatchConvertToCHD/releases/latest";
+    public const string GitHubApiLatestReleaseUrl = "https://api.github.com/repos/Endymi0n74/BIN_CHD_Converter/releases/latest";
 
     /// <summary>
     /// The canonical name of this application, used for API calls, window titles, and mutex naming.
