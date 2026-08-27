@@ -1,213 +1,119 @@
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-0078d7.svg)](#macos-and-linux-cli)
-[![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512bd4.svg)](https://dotnet.microsoft.com/download/dotnet/10.0)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE.txt)
-[![GitHub release](https://img.shields.io/github/v/release/Endymi0n74/BIN_CHD_Converter)](https://github.com/Endymi0n74/BIN_CHD_Converter/releases)
+# BIN_CHD_Converter
 
-# BIN CHD Converter
+Portable desktop batch converter for optical-disc and hard-disk images.
 
-> **BIN CHD Converter** (formerly *Batch Convert to CHD Next*) is a desktop utility
-> to convert disk images to CHD and to extract CHD files back to **BIN/CUE** (CD),
-> ISO (DVD) or IMG (HDD). The lightweight Tauri/Rust client in `next-app/` runs on
-> Windows, macOS and Linux without requiring .NET. It supports scanning,
-> conversion, verification, automatic CD/DVD/HDD extraction, same-folder output,
-> collision-safe renaming, archives, PBP, CCD and CSO/CISO. The legacy WPF client
-> remains available for Windows users.
+[![Build](https://github.com/Endymi0n74/BIN_CHD_Converter/actions/workflows/next-release.yml/badge.svg)](https://github.com/Endymi0n74/BIN_CHD_Converter/actions/workflows/next-release.yml)
+[![Latest release](https://img.shields.io/github/v/release/Endymi0n74/BIN_CHD_Converter)](https://github.com/Endymi0n74/BIN_CHD_Converter/releases/latest)
+[![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE.txt)
 
-PBP and CCD support is provided by the `Next.FormatHelper` NativeAOT sidecar.
-It is native code and does not require the .NET runtime on the destination PC.
-GitHub Actions produces Windows x64, Linux x64/ARM64 and macOS Intel/Apple
-Silicon packages from the same source tree.
+## What it does
 
-Build the lightweight client:
+BIN_CHD_Converter converts disc images to [CHD](https://docs.mamedev.org/tools/chdman.html) and extracts CHD files back to usable images. The modern client is built with Tauri/Rust and uses native sidecars, so the portable archives do not require the .NET runtime.
+
+- Batch conversion with recursive folder scanning.
+- Real-time progress, logs, ETA and cancellation.
+- Automatic CD/DVD/HDD routing based on file type and image content.
+- CHD extraction to BIN/CUE, ISO or IMG.
+- Collision-safe extraction: existing files are never overwritten.
+- Safe staging for non-ASCII and overlong Windows paths.
+- Sector-alignment preflight with clear skip messages.
+- Portable archives for Windows, macOS and Linux.
+
+## Supported inputs
+
+| Type | Extensions | Notes |
+|---|---|---|
+| CD / GD-ROM | `.cue`, `.bin`, `.raw`, `.ccd`, `.mds`, `.ecm` | Multi-track and raw-sector images are supported where their companion files are available. |
+| DVD | `.iso` | Routed to `createdvd`. |
+| Hard disk | `.img` | Routed to `createhd` unless content detection identifies a raw CD. |
+| Console | `.gdi`, `.pbp` | Dreamcast and PlayStation images. |
+| Compressed | `.cso`, `.ciso` | Decoded through the native format helper. |
+| Archives | `.zip`, `.7z`, `.rar` | Archives are unpacked to a temporary workspace. |
+| Output | `.chd` | CHD extraction supports CD, DVD and HDD targets. |
+
+ECM and MDS conversion is provided by the `batch-format-helper` NativeAOT sidecar. MDS sets must keep their `.mdf` and split data files beside the `.mds` descriptor.
+
+## Download
+
+Download the latest portable archive from the [Releases page](https://github.com/Endymi0n74/BIN_CHD_Converter/releases/latest):
+
+- `BIN_CHD_Converter-win-x64-portable.zip`
+- `BIN_CHD_Converter-win-arm64-portable.zip`
+- `BIN_CHD_Converter-osx-x64-portable.tar.gz`
+- `BIN_CHD_Converter-osx-arm64-portable.tar.gz`
+- `BIN_CHD_Converter-linux-x64-portable.tar.gz`
+- `BIN_CHD_Converter-linux-arm64-portable.tar.gz`
+
+The macOS and Linux builds are currently published as best-effort, untested portable artifacts. They are not installer packages. On Unix systems, make the application executable before launching it:
+
+```sh
+chmod +x BIN_CHD_Converter batch-format-helper-*
+./BIN_CHD_Converter
+```
+
+Keep the main executable and `batch-format-helper` in the same directory. `chdman` must be installed separately and available beside the application or on `PATH` (for example, `brew install mame` on macOS or the appropriate MAME tools package on Linux).
+
+## Windows portable build
+
+The Windows archives are self-contained and do not require the .NET runtime. Extract one archive, keep its files together, and launch `BIN_CHD_Converter.exe`.
+
+The repository also retains the legacy WPF client under `BatchConvertToCHD/`; the Tauri client is the recommended cross-platform application.
+
+## Build from source
+
+Requirements:
+
+- .NET SDK 10
+- Node.js 24 and npm
+- Rust stable and Cargo
+- Tauri 2 build prerequisites for the target platform
+- MAME `chdman` for runtime conversion tests
+
+Build and test the .NET components:
+
+```sh
+dotnet test BatchConvertToCHD.Tests/BatchConvertToCHD.Tests.csproj
+```
+
+Build the frontend and Rust client:
 
 ```sh
 cd next-app
-npm install
-npm run tauri build
+npm ci
+npm run build
+cargo build --release --manifest-path src-tauri/Cargo.toml
 ```
 
-**BIN CHD Converter** is a high-performance desktop utility designed to streamline the conversion of various disk image formats into the **Compressed Hunks of Data (CHD)** format, and the extraction of CHD files back to **BIN/CUE**, ISO or IMG.
-
-![BIN CHD Converter Screenshot](screenshot.png)
-![BIN CHD Converter Screenshot](screenshot2.png)
-![BIN CHD Converter Screenshot](screenshot3.png)
-
-## 🚀 Key Features
-
-### 💻 Modern Side-by-Side Dashboard
-*   **Dual-Pane Interface**: View your settings and file list on the left, while monitoring real-time process logs on the right.
-*   **Interactive File Selection**: Automatically scans folders and allows you to manually pick exactly which files to process via a detailed file list.
-*   **Optimized File Loader**: Utilizes a chunked loading strategy to maintain UI responsiveness even when scanning directories with thousands of files.
-*   **Resizable Layout**: Includes a built-in grid splitter to adjust the balance between the file explorer and the terminal view.
-
-### 💻 Multi-Architecture Support
-*   **Native ARM64 & x64**: Automatically detects your system architecture and utilizes the appropriate `chdman` binaries for conversion for maximum efficiency.
-*   **Optimized Performance**: Leverages native instructions on ARM64 hardware to reduce overhead during heavy compression tasks.
-
-### 🛠️ Intelligent Conversion & Extraction
-*   **Automated Batch Processing**: Convert entire directories of disk images with real-time progress monitoring and immediate cancellation response.
-*   **Recursive Structure Preservation**: Maintains your original directory hierarchy in the output folder when processing subfolders.
-*   **CHD → BIN/CUE Extraction**: Extracts CHD files back to **.bin + .cue** (CD/GD-ROM), **.iso** (DVD) or **.img** (HDD), with automatic type detection or an explicit format choice, using the [CHDSharp](https://www.nuget.org/packages/CHDSharp) library (WPF) / `chdman` (Tauri).
-*   **Archive Integration**: Transparently handles `.zip`, `.7z`, and `.rar` archives, extracting and processing contents automatically while respecting cancellation tokens. Includes a 7za.exe fallback for `.7z` files that SharpCompress cannot extract.
-*   **CloneCD Support**: Convert CloneCD `.ccd` disc images to CHD format via the [CCDSharp](https://) library. Automatically generates CUE/BIN from `.ccd`/`.img` sets.
-*   **CSO Decompression**: Built-in support for `.cso` and `.ciso` (Compressed ISO) files via the [CSOSharp](https://github.com/PureLogicCode/CSOSharp) library (supports deflate/zlib and LZ4).
-*   **PBP Extraction**: Convert PlayStation Portable `.pbp` files to CHD format via the [PBPSharp](https://github.com/PureLogicCode/PBPSharp) library.
-
-### ✅ Integrity, Safety & Verification
-*   **Safe Deletion**: Source files (and their dependencies like `.bin`, `.sub`, etc.) are only deleted if the conversion/extraction is confirmed successful.
-*   **Batch Verification**: Validate the checksums and structural integrity of existing CHD files using the [CHDSharp](https://www.nuget.org/packages/CHDSharp) library.
-*   **Automated Organization**: Optionally move verified or failed files into dedicated subfolders (`Success`/`Failed`) while ignoring these special folders during subsequent scans.
-*   **Cleanup**: Automatically removes empty subdirectories left behind after files are moved or deleted.
-*   **Dependency Protection**: Performs a critical dependency check on startup to notify you if required components (like `chdman.exe`, needed for conversion) are missing.
-*   **File System Monitoring**: Automatically monitors the input folder for file changes (deletions, renames, creations) during batch processing and provides diagnostic context when a file goes missing mid-operation.
-
-### 📊 Performance & UI
-*   **Real-time Telemetry**: Monitor disk write/read speeds and elapsed time during operations.
-*   **Optimized Logging**: High-performance logging system with automatic truncation to keep the application responsive during long-running tasks.
-*   **WPF-UI Theming**: Modern dark-themed UI powered by [WPF-UI](https://github.com/lepoco/wpfui) with Mica backdrop, rounded corners, and native Windows 11 aesthetics.
-
-### 🔄 Updates & Stability
-*   **Automatic Update Checks**: Notifies you immediately if a newer version is available on GitHub at startup.
-*   **Automated Bug Reporting**: Built-in error reporting system helps improve the application by automatically sending crash reports (no personal data collected).
-
----
-
-## 📂 Supported Formats
-
-| Category             | Formats                                                    |
-|:---------------------|:-----------------------------------------------------------|
-| **Standard Images**  | `.iso`, `.cue` (+`.bin`), `.img`, `.ccd` (+`.img`), `.raw`, `.toc`, `.mds` (+`.mdf`/split parts) |
-| **Console Specific** | `.gdi` (Dreamcast), `.pbp` (PlayStation)                   |
-| **Compressed**       | `.cso`/`.ciso`, `.ecm` (ECM image), `.zip`, `.7z`, `.rar` |
-| **Archives**         | `.zip`, `.7z`, `.rar`                                      |
-| **Output**           | `.chd` (Compressed Hunks of Data)                          |
-
----
-
-## 🛠️ Technical Logic
-
-The application implements priority-based logic to ensure compatibility:
-
-1.  **DVD Images (`.iso`)**: Defaults to `createdvd`.
-2.  **Multi-track Images (`.cue`, `.gdi`, `.toc`)**: Defaults to `createcd`.
-3.  **Hard Disk Images (`.img`)**: Defaults to `createhd` unless an accompanying `.cue` file is detected, in which case `createcd` is used.
-4.  **Raw Data (`.raw`)**: Defaults to `createraw`.
-5.  **PlayStation PBP (`.pbp`)**: Extracts to CUE/BIN using PBPSharp, then converts to CHD using `createcd`.
-6.  **CloneCD (`.ccd`)**: Converts to CUE/BIN using CCDSharp, then converts to CHD using `createcd`.
-
-*Note: Users can manually override these settings via the UI to force specific modes (except for PBP which always extracts first).*
-
----
-
-## 💻 Requirements
-
-*   **Operating System**: Windows 10 / 11 (x64 or ARM64)
-*   **Runtime**: [.NET 10.0 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0)
-*   **Bundled Dependencies**:
-    *   `chdman.exe` / `chdman_arm64.exe` (MAME Project — conversion only)
-    *   `7za.exe` / `7za_arm64.exe` (7-Zip fallback extraction)
-*   **Library Dependencies**:
-    * [WPF-UI](https://github.com/lepoco/wpfui) (v4.3.0) — Modern Fluent Design theming and controls
-    * [CHDSharp](https://www.nuget.org/packages/CHDSharp) (v1.2.0) — Pure C# CHD reading, verification, and extraction
-    * [CSOSharp](https://) (v1.0.0) — Pure C# CSO/CISO decompression (deflate + LZ4)
-    * [PBPSharp](https://) (v1.0.0) — Pure C# PBP extraction and SFO parsing
-    * [CCDSharp](https://) (v1.0.0) — Pure C# CloneCD (.ccd/.img/.sub) parsing and conversion
-    * [SharpCompress](https://github.com/adamhathcock/sharpcompress) (v0.50.1) — Archive extraction support
-    * [Serilog](https://serilog.net/) (v4.4.0) — Structured diagnostic logging
-
----
-
-## 📥 Installation
-
-1.  Download the portable archive for your platform (`windows-x64`, `windows-arm64`, `macos-x64`, `macos-arm64`, `linux-x64` or `linux-arm64`) from the [Releases](https://github.com/Endymi0n74/BIN_CHD_Converter/releases) page.
-2.  Extract the contents to a permanent folder.
-3.  **Important**: Keep the application executable and its bundled `chdman`/`batch-format-helper` sidecars together in the extracted directory.
-4.  Launch the application.
-
-The portable Windows builds are self-contained: **the .NET runtime does not
-need to be installed** on the destination PC. Each archive only contains the
-`chdman` and `7za` binaries needed by its target architecture.
-
----
-
-## 📖 Usage
-
-The application also accepts a folder path as a command-line argument to quickly populate the source directory:
-```sh
-BatchConvertToCHD.exe "C:\ROMs\MyGames"
-```
-
-### Conversion Workflow
-1.  Navigate to the **Convert to CHD** tab.
-2.  Select your **Source Folder** (containing images or archives).
-3.  Select your **Output Folder**.
-4.  *(Optional)* Check "Process smaller files first" to sort by file size.
-5.  *(Optional)* Check "Force CD" or "Force DVD" to override automatic command detection.
-6.  *(Optional)* Set a time limit per file to abort conversions that exceed the specified duration.
-7.  *(Optional)* Enable "Delete original files" to clean up source data after a successful conversion.
-8.  Click **Start Conversion**.
-
-### Extraction Workflow
-1.  Navigate to the **Extract CHD Files** tab.
-2.  Select your **Source Folder** (containing `.chd` files).
-3.  Select your **Output Folder**.
-4.  Choose the desired output format (Auto-detect, **BIN/CUE** for CD/GD-ROM, DVD `.iso`, HDD `.img`).
-5.  *(Optional)* Enable "Include subfolders" to process nested directories.
-6.  *(Optional)* Enable "Delete original CHD files" to clean up after successful extraction.
-7.  Click **Start Extraction**.
-
-### Verification Workflow
-1.  Navigate to the **Verify CHD Files** tab.
-2.  Select the folder containing your `.chd` files.
-3.  Configure folder organization options (Success/Failed folders).
-4.  Click **Start Verification**.
-
----
-
-## 🤝 Contributing & Support
-
-If you encounter issues or have feature requests, please use the [GitHub Issues](https://github.com/Endymi0n74/BIN_CHD_Converter/issues) tracker.
-
-**Support the Project:**
-If this tool saves you time, consider supporting further development:
-*   ⭐ **Star this repository** on GitHub.
-*   ☕ **Donate**: [www.purelogiccode.com/donate](https://www.purelogiccode.com/donate)
-
----
-
-## 📜 License
-
-This project is licensed under the **GNU General Public License v3.0**. See the [LICENSE.txt](LICENSE.txt) file for details.
-
-**Acknowledgements:**
-*   [MAME Team](https://www.mamedev.org/) for `chdman`.
-*   [CHDSharp](https://www.nuget.org/packages/CHDSharp) by Peterson Fernandes — Pure C# CHD read-only library supporting V1-V5, all 10 codecs, parent/child chaining, and parallel verification.
-*   [WPF-UI](https://github.com/lepoco/wpfui) by lepoco — Modern Windows 11 Fluent Design theming and controls.
-*   [CSOSharp](https://) by Peterson Fernandes — Pure C# CSO/CISO decompression library.
-*   [PBPSharp](https://) by Peterson Fernandes — Pure C# PlayStation PBP extraction library.
-*   [CCDSharp](https://) by Peterson Fernandes — Pure C# CloneCD disc image parsing and conversion library.
-*   [SharpCompress](https://github.com/adamhathcock/sharpcompress) for archive handling.
-*   [Serilog](https://serilog.net/) for structured logging.
-*   [Igor Pavlov](https://www.7-zip.org/) for `7za.exe` (7-Zip command-line tool).
-
----
-Developed by [Pure Logic Code](https://www.purelogiccode.com)
-
-## macOS and Linux CLI
-
-The `batchconverttochd` frontend supports batch conversion, extraction and
-verification on macOS/Linux, including recursive traversal, parallel jobs,
-tree preservation, dry runs and safe source deletion. Install `chdman` first
-(`brew install mame` on macOS or your distribution's `mame-tools` package), then:
+Build the NativeAOT format helper:
 
 ```sh
-chmod +x batchconverttochd.sh install-unix.sh
-sudo ./install-unix.sh               # system-wide
-./install-unix.sh --user             # or only for the current user
-batchconverttochd convert ~/ROMs ~/CHD -r -j 4
-batchconverttochd extract ~/CHD ~/Extracted -r --format auto
-batchconverttochd verify ~/CHD -r
+dotnet publish Next.FormatHelper/Next.FormatHelper.csproj -c Release -r win-x64 --self-contained true
 ```
 
-The WPF graphical interface remains Windows-only; run
-`batchconverttochd --help` for all cross-platform CLI options.
+## Command-line format helper
+
+The sidecar can be invoked directly:
+
+```text
+batch-format-helper <pbp|ccd|cso|ecm|mds> <input> <output-directory>
+```
+
+It prints the generated convertible file path to standard output and diagnostics to standard error.
+
+## Safety notes
+
+- Source files are deleted only after successful conversion when deletion is enabled.
+- Partial outputs are removed after a failed or canceled `chdman` operation.
+- Extraction diverts to a numbered subdirectory when the destination already exists.
+- Images with invalid sector alignment are skipped before conversion.
+- macOS/Linux artifacts have not been tested locally; contributions and reports are welcome.
+
+## Contributing and support
+
+Please open an issue at [GitHub Issues](https://github.com/Endymi0n74/BIN_CHD_Converter/issues) with the operating system, architecture, input format and relevant log output.
+
+## License
+
+BIN_CHD_Converter is distributed under the GNU General Public License v3.0. See [LICENSE.txt](LICENSE.txt).
+
+The project uses or incorporates CHDSharp, CSOSharp, PBPSharp, CCDSharp, SharpCompress, Tauri and MAME/chdman. See the source and package metadata for their respective licenses and notices.
