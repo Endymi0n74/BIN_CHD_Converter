@@ -11,12 +11,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: windows-latest, rid: win-x64, triple: x86_64-pc-windows-msvc, exe: ".exe", archive: zip }
-          - { os: windows-latest, rid: win-arm64, triple: aarch64-pc-windows-msvc, exe: ".exe", archive: zip }
-          - { os: ubuntu-24.04, rid: linux-x64, triple: x86_64-unknown-linux-gnu, exe: "", archive: tar.gz }
-          - { os: ubuntu-24.04-arm, rid: linux-arm64, triple: aarch64-unknown-linux-gnu, exe: "", archive: tar.gz }
-          - { os: macos-15-intel, rid: osx-x64, triple: x86_64-apple-darwin, exe: "", archive: tar.gz }
-          - { os: macos-15, rid: osx-arm64, triple: aarch64-apple-darwin, exe: "", archive: tar.gz }
+          - { os: windows-latest, rid: win-x64, triple: x86_64-pc-windows-msvc, exe: ".exe" }
+          - { os: windows-latest, rid: win-arm64, triple: aarch64-pc-windows-msvc, exe: ".exe" }
+          - { os: ubuntu-24.04, rid: linux-x64, triple: x86_64-unknown-linux-gnu, exe: "" }
+          - { os: ubuntu-24.04-arm, rid: linux-arm64, triple: aarch64-unknown-linux-gnu, exe: "" }
+          - { os: macos-15-intel, rid: osx-x64, triple: x86_64-apple-darwin, exe: "" }
+          - { os: macos-15, rid: osx-arm64, triple: aarch64-apple-darwin, exe: "" }
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -31,6 +31,8 @@ jobs:
       - name: Linux desktop dependencies
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - name: Install Rust target
+        run: rustup target add ${{ matrix.triple }}
       - name: Build native format helper
         run: dotnet publish Next.FormatHelper/Next.FormatHelper.csproj -c Release -r ${{ matrix.rid }} -o helper --self-contained true
       - name: Install frontend dependencies
@@ -49,15 +51,14 @@ jobs:
         working-directory: next-app
         run: |
           mkdir -p portable
+          cargo build --release --target "${{ matrix.triple }}" --manifest-path src-tauri/Cargo.toml
           if [[ "${{ runner.os }}" == "Windows" ]]; then
-            cargo build --release --manifest-path src-tauri/Cargo.toml
-            cp src-tauri/target/release/bin-chd-converter.exe portable/BIN_CHD_Converter.exe
-            cp src-tauri/bin/batch-format-helper-${{ matrix.triple }}.exe portable/
+            cp "src-tauri/target/${{ matrix.triple }}/release/bin-chd-converter.exe" portable/BIN_CHD_Converter.exe
+            cp "src-tauri/bin/batch-format-helper-${{ matrix.triple }}.exe" portable/
             7z a "../BIN_CHD_Converter-${{ matrix.rid }}-portable.zip" ./portable/*
           else
-            cargo build --release --manifest-path src-tauri/Cargo.toml
-            cp src-tauri/target/release/bin-chd-converter portable/BIN_CHD_Converter
-            cp src-tauri/bin/batch-format-helper-${{ matrix.triple }} portable/
+            cp "src-tauri/target/${{ matrix.triple }}/release/bin-chd-converter" portable/BIN_CHD_Converter
+            cp "src-tauri/bin/batch-format-helper-${{ matrix.triple }}" portable/
             tar -czf "../BIN_CHD_Converter-${{ matrix.rid }}-portable.tar.gz" -C portable .
           fi
       - uses: actions/upload-artifact@v4
