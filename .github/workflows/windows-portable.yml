@@ -24,4 +24,6 @@ jobs:
       - name: Attach archive to release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v1.0.0
           files: BIN_CHD_Converter-${{ matrix.rid }}-legacy-portable.zip
+          generate_release_notes: false
