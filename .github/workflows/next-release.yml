@@ -44,13 +44,22 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y mame-tools
           fi
+      - name: Locate chdman and Windows runtime dependencies
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $chdman = Get-ChildItem -Path $env:ChocolateyInstall -Filter chdman.exe -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $chdman) { throw 'chdman.exe was not found after installing MAME' }
+          New-Item -ItemType Directory -Force tools | Out-Null
+          Copy-Item $chdman.FullName tools/chdman.exe
+          $runtime = Join-Path $chdman.DirectoryName 'SDL2.dll'
+          if (Test-Path $runtime) { Copy-Item $runtime tools/SDL2.dll }
+          Write-Host "Bundled $($chdman.FullName)"
       - name: Locate chdman
+        if: runner.os != 'Windows'
         shell: bash
         run: |
           CHDMAN=$(command -v chdman || true)
-          if [[ -z "$CHDMAN" ]]; then
-            CHDMAN=$(find /usr /opt "${ProgramFiles:-}" "${ProgramFiles(x86):-}" -type f -iname 'chdman*' 2>/dev/null | head -n 1)
-          fi
           test -n "$CHDMAN" && test -f "$CHDMAN"
           mkdir -p tools
           cp "$CHDMAN" "tools/chdman${{ matrix.exe }}"
@@ -77,6 +86,12 @@ jobs:
             cp "src-tauri/target/${{ matrix.triple }}/release/bin-chd-converter.exe" portable/BIN_CHD_Converter.exe
             cp "src-tauri/bin/batch-format-helper-${{ matrix.triple }}.exe" portable/
             cp "../tools/chdman.exe" portable/chdman.exe
+            if [[ -f "../tools/SDL2.dll" ]]; then cp "../tools/SDL2.dll" portable/SDL2.dll; fi
+            if ! ./portable/chdman.exe -? > /dev/null 2>&1; then echo 'Bundled chdman failed to start'; exit 1; fi
+            mkdir -p smoke
+            python -c "from pathlib import Path; p=Path('smoke/sample.iso'); p.write_bytes(bytes(2048))"
+            ./portable/chdman.exe createdvd -i smoke/sample.iso -o smoke/sample.chd
+            test -s smoke/sample.chd
             7z a "../BIN_CHD_Converter-${{ matrix.rid }}-portable.zip" ./portable/*
           else
             cp "src-tauri/target/${{ matrix.triple }}/release/bin-chd-converter" portable/BIN_CHD_Converter

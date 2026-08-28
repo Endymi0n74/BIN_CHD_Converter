@@ -51,7 +51,7 @@ chmod +x BIN_CHD_Converter batch-format-helper-*
 ./BIN_CHD_Converter
 ```
 
-Each portable archive includes a matching native `chdman` executable from MAME alongside `BIN_CHD_Converter` and `batch-format-helper`. The application searches its own directory first, then falls back to `chdman` on `PATH`. You do not need to install MAME separately for the published archives.
+Each Windows portable archive includes a matching native `chdman.exe` from MAME, its required `SDL2.dll` when applicable, and `batch-format-helper`. The application searches its own directory first, then falls back to `chdman` on `PATH`. You do not need to install MAME separately for the published Windows archives. The CI also performs a real ISO-to-CHD smoke conversion with the bundled executable.
 
 ## Windows portable build
 
