@@ -70,5 +70,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v1.0.0
+          target_commitish: ${{ github.sha }}
           files: BIN_CHD_Converter-${{ matrix.rid }}-portable.*
           generate_release_notes: true
