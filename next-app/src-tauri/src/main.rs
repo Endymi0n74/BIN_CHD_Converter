@@ -50,6 +50,9 @@ fn cancel_batch(state: State<'_, Cancellation>) -> bool {
 
 fn find_command(names: &[&str]) -> Option<PathBuf> {
     let mut roots = vec![env::current_exe().ok()?.parent()?.to_path_buf()];
+    if let Ok(resource_dir) = env::var("TAURI_RESOURCE_DIR") {
+        roots.push(PathBuf::from(resource_dir));
+    }
     roots.extend(env::var_os("PATH").as_deref().map(env::split_paths).into_iter().flatten());
     for root in roots {
         for name in names {

@@ -51,7 +51,7 @@ chmod +x BIN_CHD_Converter batch-format-helper-*
 ./BIN_CHD_Converter
 ```
 
-Keep the main executable and `batch-format-helper` in the same directory. `chdman` must be installed separately and available beside the application or on `PATH` (for example, `brew install mame` on macOS or the appropriate MAME tools package on Linux).
+Each portable archive includes a matching native `chdman` executable from MAME alongside `BIN_CHD_Converter` and `batch-format-helper`. The application searches its own directory first, then falls back to `chdman` on `PATH`. You do not need to install MAME separately for the published archives.
 
 ## Windows portable build
 
@@ -67,7 +67,7 @@ Requirements:
 - Node.js 24 and npm
 - Rust stable and Cargo
 - Tauri 2 build prerequisites for the target platform
-- MAME `chdman` for runtime conversion tests
+- MAME `chdman` only when running conversion tests locally; published archives already include it
 
 Build and test the .NET components:
 
