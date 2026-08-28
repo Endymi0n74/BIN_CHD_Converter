@@ -39,7 +39,7 @@ jobs:
           if [[ "${{ runner.os }}" == "Windows" ]]; then
             choco install mame -y --no-progress
           elif [[ "${{ runner.os }}" == "macOS" ]]; then
-            brew install mame
+            brew install mame --formula
           else
             sudo apt-get update
             sudo apt-get install -y mame-tools
@@ -54,6 +54,8 @@ jobs:
           Copy-Item $chdman.FullName tools/chdman.exe
           $runtime = Join-Path $chdman.DirectoryName 'SDL2.dll'
           if (Test-Path $runtime) { Copy-Item $runtime tools/SDL2.dll }
+          & tools/chdman.exe -? *> $null
+          if ($LASTEXITCODE -gt 1) { throw "Bundled chdman failed to start ($LASTEXITCODE)" }
           Write-Host "Bundled $($chdman.FullName)"
       - name: Locate chdman
         if: runner.os != 'Windows'
